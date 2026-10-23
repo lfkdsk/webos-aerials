@@ -8,8 +8,18 @@ var ID=/^[0-9A-Fa-f-]{36}$/,QUALITY=/^[0-9A-Za-z-]{1,12}$/;
 function fileName(id,quality){return id+'.'+quality+'.mov';}
 function okEntry(e){return e&&ID.test(e.id)&&QUALITY.test(e.quality)&&typeof e.url==='string'&&/^https:\/\/sylvan\.apple\.com\//.test(e.url);}
 
+// sylvan.apple.com chains to Apple's own root, which Node's bundled Mozilla store lacks,
+// so the TV's node fails with UNABLE_TO_GET_ISSUER_CERT_LOCALLY. ca.pem (Apple Root CA
+// plus the server-auth intermediate) is added to the trust list; nothing is skipped.
+function trustedCAs(){
+ try{
+  var extra=fs.readFileSync(path.join(__dirname,'ca.pem'),'utf8').split(/(?=-----BEGIN CERTIFICATE-----)/).filter(function(s){return /BEGIN CERTIFICATE/.test(s);});
+  return (require('tls').rootCertificates||[]).concat(extra);
+ }catch(_){return undefined;}
+}
+
 function createCache(options){
- var dir=options.dir,https=options.https||require('https'),log=options.log||function(){};
+ var dir=options.dir,https=options.https||require('https'),log=options.log||function(){},ca=options.ca===undefined?trustedCAs():options.ca;
  var wanted=[],current=null,listeners=[],stopped=false,lastError=null,timer=null;
 
  function ensureDir(){if(!fs.existsSync(dir))fs.mkdirSync(dir,{recursive:true,mode:493});}
@@ -59,7 +69,8 @@ function createCache(options){
     var cancelled=!!(current&&current.cancelled);current=null;notify();resolve(err?(cancelled?'cancelled':false):true);
    }
    var req;
-   try{req=https.get(entry.url,{headers:headers},function(res){
+   var reqOptions={headers:headers};if(ca)reqOptions.ca=ca;
+   try{req=https.get(entry.url,reqOptions,function(res){
     if(res.statusCode===416){try{fs.renameSync(part,target);}catch(_){}res.resume();done();return;}
     if(received>0&&res.statusCode===200){received=0;try{fs.unlinkSync(part);}catch(_){}}
     else if(res.statusCode!==200&&res.statusCode!==206){res.resume();done(new Error('http-'+res.statusCode));return;}
