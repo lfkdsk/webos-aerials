@@ -1,0 +1,140 @@
+/* webOS renders web apps at 1920x1080. Sizes are in CSS px at that resolution. */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: 'LG Smart UI', 'PingFang SC', 'Noto Sans CJK SC', 'Helvetica Neue', sans-serif;
+  cursor: default;
+}
+
+/* ---- screensaver ---------------------------------------------------------------------------- */
+
+#screensaver {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 600ms ease;
+}
+
+#screensaver.on { opacity: 1; }
+
+#screensaver video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+#screensaver video.shown { opacity: 1; }
+
+/* Location and clock show for a few seconds per clip, then fade so nothing sits still on an OLED. */
+.ssLabel, .ssClock {
+  position: absolute;
+  bottom: 84px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 700ms ease, transform 700ms ease;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+.ssLabel { left: 104px; }
+.ssClock { right: 104px; font-size: 60px; font-weight: 300; letter-spacing: -0.03em; line-height: 1; }
+
+#screensaver.hud .ssLabel, #screensaver.hud .ssClock { opacity: 1; transform: none; }
+
+.ssZh { font-size: 40px; font-weight: 500; letter-spacing: 0.02em; }
+
+.ssEn {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ---- hint (saver stopped) ------------------------------------------------------------------- */
+
+#hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: radial-gradient(circle at 50% 40%, #16305c 0%, #050b16 70%);
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+#hint.shown { opacity: 1; }
+.hintTitle { font-size: 56px; font-weight: 500; letter-spacing: 0.04em; }
+.hintBody { font-size: 28px; color: rgba(255, 255, 255, 0.7); letter-spacing: 0.06em; }
+
+/* ---- toast ---------------------------------------------------------------------------------- */
+
+#toast {
+  position: absolute;
+  left: 50%;
+  bottom: 80px;
+  padding: 20px 40px;
+  border-radius: 40px;
+  background: rgba(40, 40, 44, 0.95);
+  font-size: 28px;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity 200ms ease;
+  z-index: 600;
+}
+
+#toast.shown { opacity: 1; }
+
+/* ---- settings panel ------------------------------------------------------------------------- */
+
+#saverPanel { position: fixed; inset: 0; z-index: 510; background: rgba(7, 10, 14, 0.93); display: flex; align-items: center; justify-content: center; color: #f5f7fa; }
+#saverPanel.hidden { display: none; }
+
+.renewal-card { width: 1450px; max-height: 930px; overflow: auto; padding: 48px 56px; border: 1px solid #414650; border-radius: 30px; background: #202329; box-shadow: 0 24px 100px #0008; }
+.renewal-heading { display: flex; align-items: center; gap: 24px; }
+.renewal-card h2 { font-size: 44px; margin: 0 0 18px; }
+.renewal-card p { font-size: 25px; line-height: 1.45; margin: 12px 0; color: #ccd1db; }
+.renewal-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+.renewal-actions button { font: inherit; font-size: 25px; color: #eee; background: #343941; border: 3px solid transparent; border-radius: 30px; padding: 16px 25px; outline: none; }
+.renewal-actions button:focus { border-color: white; background: #505965; }
+.renewal-actions button:disabled { opacity: 0.45; }
+
+#saverRows { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+
+.saver-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font: inherit;
+  font-size: 27px;
+  color: #eee;
+  background: #2a2e36;
+  border: 3px solid transparent;
+  border-radius: 22px;
+  padding: 16px 30px;
+  outline: none;
+  text-align: left;
+}
+
+.saver-row:focus { border-color: #fff; background: #505965; }
+.saver-row:disabled { opacity: 0.45; }
+.saver-value { color: #9fd0ff; font-weight: 500; }
+.saver-row:focus .saver-value { color: #fff; }
+#saverCache { white-space: pre-line; font-size: 23px; line-height: 1.5; color: #ccd1db; margin: 8px 0 20px; min-height: 70px; }

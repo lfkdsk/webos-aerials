@@ -1,0 +1,11 @@
+{
+  "name": "webos-aerials",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Apple TV Aerial flyovers as a screensaver app and launcher module for LG webOS",
+  "scripts": {
+    "test": "node --test --test-timeout=40000 tests/",
+    "build": "scripts/build.sh"
+  },
+  "license": "MIT"
+}

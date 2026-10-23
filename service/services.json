@@ -1,0 +1,1 @@
+{"id":"com.lfkdsk.aerials.service","description":"Local cache for the Aerials screensaver","services":[{"name":"com.lfkdsk.aerials.service"}],"requiredACG":["activity.operation"]}

@@ -1,0 +1,16 @@
+{
+  "id": "com.lfkdsk.aerials",
+  "version": "1.0.0",
+  "vendor": "lfkdsk",
+  "type": "web",
+  "main": "index.html",
+  "title": "航拍屏保",
+  "appDescription": "Apple TV Aerial flyovers as a screensaver for LG webOS",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "bgColor": "#06101f",
+  "iconColor": "#06101f",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true,
+  "handlesRelaunch": true
+}

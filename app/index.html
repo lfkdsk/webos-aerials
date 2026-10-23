@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>航拍屏保</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Idle screensaver: Aerial video plus a location label and clock that fade out (OLED). -->
+  <div id="screensaver">
+    <div class="ssLabel"><div class="ssZh"></div><div class="ssEn"></div></div>
+    <div class="ssClock"></div>
+  </div>
+
+  <!-- Shown when the flyovers are stopped: how to get back in or leave. -->
+  <div id="hint">
+    <div class="hintTitle">航拍屏保</div>
+    <div class="hintBody">OK 设置 · 其他键 继续播放 · 返回 退出</div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="aerials.js"></script>
+  <script src="screensaver.js"></script>
+  <script src="screensaver-panel.js"></script>
+  <script src="standalone.js"></script>
+</body>
+</html>
