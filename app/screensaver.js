@@ -180,6 +180,36 @@
     arm();
   }
   ['keydown', 'keyup', 'mousemove', 'mousedown', 'click', 'wheel'].forEach(function (t) { window.addEventListener(t, onInput, true); });
+
+  /* ---- LG system screensaver ---------------------------------------------------------- */
+  // webOS starts its own screensaver after about two minutes without input, ahead of our idle
+  // timer, and draws it over every app. tvpower asks subscribers first: answering ack:false
+  // holds it off. While this page is visible and the Aerials are enabled, start ours right
+  // away and decline; otherwise let LG's run.
+  var POWER = 'luna://com.webos.service.tvpower/power/';
+  var clientName = (window.SCREENSAVER && SCREENSAVER.clientName) || (window.PalmSystem && PalmSystem.identifier && String(PalmSystem.identifier).split(' ')[0]) || 'aerials';
+  function respondSaver(ack, timestamp) {
+    try {
+      var b = new PalmServiceBridge();
+      b.onservicecallback = function () { try { b.cancel(); } catch (e) {} };
+      b.call(POWER + 'responseScreenSaverRequest', JSON.stringify({clientName: clientName, ack: ack, timestamp: timestamp}));
+    } catch (e) {}
+  }
+  if (typeof PalmServiceBridge === 'function' && !(window.SCREENSAVER && SCREENSAVER.allowSystemSaver)) {
+    try {
+      var saverBridge = new PalmServiceBridge();
+      saverBridge.onservicecallback = function (raw) {
+        var r; try { r = JSON.parse(raw); } catch (e) { return; }
+        if (!r || r.timestamp === undefined) return;
+        // standalone: the Aerials app itself, which always wants the screen while visible.
+        var ours = !document.hidden && assets.length > 0 && (cfg.idleSeconds !== 0 || !!cfg.standalone);
+        if (ours && !active) start();
+        respondSaver(!ours, r.timestamp);
+      };
+      saverBridge.call(POWER + 'registerScreenSaverRequest', JSON.stringify({subscribe: true, clientName: clientName}));
+      window.__systemSaverBridge = saverBridge;
+    } catch (e) {}
+  }
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) { stop(); clearTimeout(idleTimer); closeBridge(); } else { arm(); syncCache(); }
   });
