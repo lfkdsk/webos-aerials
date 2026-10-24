@@ -138,3 +138,6 @@ html, body {
 .saver-value { color: #9fd0ff; font-weight: 500; }
 .saver-row:focus .saver-value { color: #fff; }
 #saverCache { white-space: pre-line; font-size: 23px; line-height: 1.5; color: #ccd1db; margin: 8px 0 20px; min-height: 70px; }
+
+/* Screensaver hand-off: no hint screen, the first input closes the app. */
+body.saver-mode #hint { display: none; }

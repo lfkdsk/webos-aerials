@@ -43,6 +43,8 @@
         Screensaver.update({categories: next.length === CATS.length ? null : next});
       }});
     });
+    if (!(window.SCREENSAVER && SCREENSAVER.standalone)) list.push({label: '在其他 App 里也用航拍', value: p.everywhere === false ? '关' : '开',
+      step: function () { Screensaver.update({everywhere: p.everywhere === false}); }});
     var per = QUALITY[q][3], n = p.cache.count;
     list.push({label: '本地缓存', value: n ? n + ' 段（约 ' + (n * per).toFixed(1) + ' GB）' : '关闭',
       step: function (d) { var i = Math.max(0, COUNT.indexOf(n)); Screensaver.update({cache: {count: COUNT[(i + d + COUNT.length) % COUNT.length]}}); }});

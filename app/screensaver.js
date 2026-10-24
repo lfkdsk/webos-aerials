@@ -18,7 +18,7 @@
     if (stored && typeof stored === 'object') { var c = cfg.cache; merge(cfg, stored); cfg.cache = merge(c, stored.cache || {}); }
   }
   function savePrefs() {
-    var out = {idleSeconds: cfg.idleSeconds, quality: cfg.quality, categories: cfg.categories, cache: cfg.cache, cacheOrder: cfg.cacheOrder || null};
+    var out = {idleSeconds: cfg.idleSeconds, quality: cfg.quality, categories: cfg.categories, cache: cfg.cache, cacheOrder: cfg.cacheOrder || null, everywhere: cfg.everywhere};
     try { localStorage.setItem(PREF_KEY, JSON.stringify(out)); } catch (e) {}
   }
   loadPrefs();
@@ -185,7 +185,9 @@
   // webOS starts its own screensaver after about two minutes without input, ahead of our idle
   // timer, and draws it over every app. tvpower asks subscribers first: answering ack:false
   // holds it off. While this page is visible and the Aerials are enabled, start ours right
-  // away and decline; otherwise let LG's run.
+  // away and decline. While another app is in front (a paused video, a menu), hand the screen
+  // to the standalone Aerials app in screensaver mode, which closes on the first key and
+  // leaves that app where it was. If that app is missing, let LG's run.
   var POWER = 'luna://com.webos.service.tvpower/power/';
   var clientName = (window.SCREENSAVER && SCREENSAVER.clientName) || (window.PalmSystem && PalmSystem.identifier && String(PalmSystem.identifier).split(' ')[0]) || 'aerials';
   function respondSaver(ack, timestamp) {
@@ -203,8 +205,15 @@
         if (!r || r.timestamp === undefined) return;
         // standalone: the Aerials app itself, which always wants the screen while visible.
         var ours = !document.hidden && assets.length > 0 && (cfg.idleSeconds !== 0 || !!cfg.standalone);
-        if (ours && !active) start();
-        respondSaver(!ours, r.timestamp);
+        if (ours) { if (!active) start(); respondSaver(false, r.timestamp); return; }
+        if (!document.hidden || cfg.standalone || cfg.idleSeconds === 0 || cfg.everywhere === false) { respondSaver(true, r.timestamp); return; }
+        var ts = r.timestamp, launch = new PalmServiceBridge();
+        launch.onservicecallback = function (raw2) {
+          var ok = false; try { ok = JSON.parse(raw2).returnValue === true; } catch (e) {}
+          try { launch.cancel(); } catch (e) {}
+          respondSaver(!ok, ts);
+        };
+        launch.call('luna://com.webos.applicationManager/launch', JSON.stringify({id: cfg.everywhereApp || 'com.lfkdsk.aerials', params: {screensaver: true}}));
       };
       saverBridge.call(POWER + 'registerScreenSaverRequest', JSON.stringify({subscribe: true, clientName: clientName}));
       window.__systemSaverBridge = saverBridge;

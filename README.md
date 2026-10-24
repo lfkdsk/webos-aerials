@@ -9,6 +9,7 @@ Apple 为 tvOS 公开了一份航拍清单（`sylvan.apple.com/Aerials/resources
 
 - **独立 App**：打开就播，随机顺序，段与段之间淡入淡出，开头几秒显示地名和时钟，然后淡出（照顾 OLED）。OK 打开设置，返回键退出。
 - **启动器模块**：同一套代码可以嵌进自制启动器（比如 [Clean Your TV](https://github.com/Razdva122/clean-your-tv-lg-webos)），启动器前台空闲几分钟后自动开始，任意键退出且那一下按键不会传给启动器。见 [docs/clean-your-tv.md](docs/clean-your-tv.md)。
+- **其他 App 里也能用**：嵌入启动器后，在别的 App 里停着不动（例如 B 站暂停）、LG 准备弹自带屏保时，启动器会拦下它并以屏保模式拉起独立 App（启动参数 `{"screensaver": true}`）；按任意键独立 App 立即关闭，回到原来的 App 原来的位置。
 - **本地缓存**：可选。配套的 JS 服务把若干段下载到电视本地（断点续传、换设置自动清理、空间不足自动停），之后这些段从本地文件播放；也可以只播本地缓存。
 
 视频默认直接从 Apple 的 CDN 流式播放，和 Apple TV 自己的做法一样。LG C5（webOS 25）实测 4K HDR、4K SDR、1080p HEVC、1080p H.264 四种都能直接播，3 秒内出画面。
