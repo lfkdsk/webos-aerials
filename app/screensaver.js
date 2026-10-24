@@ -207,13 +207,26 @@
         var ours = !document.hidden && assets.length > 0 && (cfg.idleSeconds !== 0 || !!cfg.standalone);
         if (ours) { if (!active) start(); respondSaver(false, r.timestamp); return; }
         if (!document.hidden || cfg.standalone || cfg.idleSeconds === 0 || cfg.everywhere === false) { respondSaver(true, r.timestamp); return; }
-        var ts = r.timestamp, launch = new PalmServiceBridge();
-        launch.onservicecallback = function (raw2) {
-          var ok = false; try { ok = JSON.parse(raw2).returnValue === true; } catch (e) {}
-          try { launch.cancel(); } catch (e) {}
-          respondSaver(!ok, ts);
+        var ts = r.timestamp, me = clientName, aerialsApp = cfg.everywhereApp || 'com.lfkdsk.aerials';
+        // returnTo: the app the viewer was in (from the Aerials service); home: where to go if unknown.
+        function handOff(returnTo) {
+          var launch = new PalmServiceBridge();
+          launch.onservicecallback = function (raw2) {
+            var ok = false; try { ok = JSON.parse(raw2).returnValue === true; } catch (e) {}
+            try { launch.cancel(); } catch (e) {}
+            respondSaver(!ok, ts);
+          };
+          launch.call('luna://com.webos.applicationManager/launch', JSON.stringify({id: aerialsApp, params: {screensaver: true, returnTo: returnTo, home: me}}));
+        }
+        var asked = false, ask = new PalmServiceBridge();
+        ask.onservicecallback = function (raw3) {
+          if (asked) return; asked = true;
+          var f = null; try { f = JSON.parse(raw3); } catch (e) {}
+          try { ask.cancel(); } catch (e) {}
+          handOff(f && typeof f.appId === 'string' ? f.appId : null);
         };
-        launch.call('luna://com.webos.applicationManager/launch', JSON.stringify({id: cfg.everywhereApp || 'com.lfkdsk.aerials', params: {screensaver: true}}));
+        ask.call(SERVICE + 'foreground', JSON.stringify({skip: [me, aerialsApp]}));
+        setTimeout(function () { if (!asked) { asked = true; handOff(null); } }, 1500);
       };
       saverBridge.call(POWER + 'registerScreenSaverRequest', JSON.stringify({subscribe: true, clientName: clientName}));
       window.__systemSaverBridge = saverBridge;
